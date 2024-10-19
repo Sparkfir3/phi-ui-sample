@@ -2,9 +2,9 @@ using UnityEditor;
 
 namespace Sparkfire.Utility
 {
-    public class CreateScriptTemplates
+    public static class CreateScriptTemplates
     {
-        private const string FILE_PATH = "Assets/Library/Editor/ScriptTemplates/";
+        private const string FILE_PATH = "Assets/_Main/Scripts/Editor/ScriptTemplates/";
         
         [MenuItem("Assets/Create/Script/MonoBehaviour", priority = 40)]
         public static void CreateMonoBehaviour()
@@ -18,6 +18,13 @@ namespace Sparkfire.Utility
         {
             string path = FILE_PATH + "ScriptableObject.cs.txt";
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(path, "NewScriptableObject.cs");
+        }
+
+        [MenuItem("Assets/Create/Script/StaticClass", priority = 40)]
+        public static void CreateStaticClass()
+        {
+            string path = FILE_PATH + "StaticClass.cs.txt";
+            ProjectWindowUtil.CreateScriptAssetFromTemplateFile(path, "NewStaticClass.cs");
         }
     }
 }
