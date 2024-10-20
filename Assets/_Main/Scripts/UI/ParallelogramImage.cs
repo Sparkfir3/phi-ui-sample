@@ -38,6 +38,7 @@ namespace Sparkfire.UI
             vh.AddTriangle(3, 4, 5);
             vh.AddTriangle(1, 2, 3);
             vh.AddTriangle(2, 3, 5);
+
         }
     }
 }

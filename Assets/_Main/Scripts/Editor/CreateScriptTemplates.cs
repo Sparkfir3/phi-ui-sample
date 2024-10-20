@@ -26,5 +26,12 @@ namespace Sparkfire.Utility
             string path = FILE_PATH + "StaticClass.cs.txt";
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(path, "NewStaticClass.cs");
         }
+
+        [MenuItem("Assets/Create/Script/MonoBehaviourEditor", priority = 50)]
+        public static void CreateMonoBehaviourEditor()
+        {
+            string path = FILE_PATH + "MonoBehaviourEditor.cs.txt";
+            ProjectWindowUtil.CreateScriptAssetFromTemplateFile(path, "NewMonoBehaviourEditor.cs");
+        }
     }
 }

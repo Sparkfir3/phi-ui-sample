@@ -1,0 +1,21 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+
+#ROOTNAMESPACEBEGIN#
+    [CustomEditor(typeof(GameObject), true)]
+    public class #SCRIPTNAME# : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            // GameObject obj = target as GameObject;
+
+            if(GUILayout.Button("Button Name"))
+            {
+                // Function here
+            }
+        }
+    }
+#ROOTNAMESPACEEND#
