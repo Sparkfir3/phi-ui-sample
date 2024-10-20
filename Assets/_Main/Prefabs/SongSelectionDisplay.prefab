@@ -212,6 +212,7 @@ GameObject:
   - component: {fileID: 7271264195470863385}
   - component: {fileID: 1890670466426354040}
   - component: {fileID: 225654728698471902}
+  - component: {fileID: 5842501181352998739}
   m_Layer: 5
   m_Name: SongSelectionDisplay
   m_TagString: Untagged
@@ -269,6 +270,23 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   targetAngle: 75
+--- !u!114 &5842501181352998739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4354190755666886637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18ab6afa71fef074b90607a649acfe74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rectTransform: {fileID: 7271264195470863385}
+  songNameTextBox: {fileID: 6015716656886086146}
+  songArtistTextBox: {fileID: 3039060492043147850}
+  difficultyNumberTextBox: {fileID: 3863763069379203011}
+  difficultyNameTextBox: {fileID: 8481318541731354515}
 --- !u!1 &5416901331925213931
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,15 +5,15 @@ using UnityEditor;
 
 namespace Sparkfire.Sample
 {
-    [CustomEditor(typeof(LoopedScrollingList), true)]
+    [CustomEditor(typeof(ScrollingSongList), true)]
     public class LoopedScrollingListEditor : Editor
     {
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            LoopedScrollingList obj = target as LoopedScrollingList;
+            ScrollingSongList obj = target as ScrollingSongList;
 
-            if(GUILayout.Button("Add"))
+            if(Application.isPlaying && GUILayout.Button("Add"))
             {
                 obj.AddEntry();
             }
