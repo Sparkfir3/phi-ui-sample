@@ -17,7 +17,7 @@ namespace Sparkfire.Sample
 
         // ------------------------------
 
-        private void Awake()
+        private void Start()
         {
             songList.Initialize(musicData);
         }

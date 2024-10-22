@@ -47,10 +47,13 @@ namespace Sparkfire.Sample
 
         #region Unity Functions
 
-        private void Start()
+        private void Awake()
         {
+            Debug.Assert(scrollRect);
+            Debug.Assert(scrollRect.content && scrollRect.content.GetComponent<VerticalLayoutGroup>(), "ScrollRect Content was not initialized correctly. " +
+                "Either the reference is not set, or it does not have a VerticalLayoutGroup component attached!");
+
             scrollRect.onValueChanged.AddListener(CheckForLooping);
-            RebuildSongList();
         }
 
 #if UNITY_EDITOR
@@ -95,11 +98,12 @@ namespace Sparkfire.Sample
             topIndex = 0;
             bottomIndex = currentIndex;
 
-            RebuildSongList();
+            Invoke(nameof(RebuildSongList), 0f); // tbh not entirely sure why this fixes the rebuild on the same frame as initializing, but it works ig
         }
 
         public void ClearList()
         {
+            songDisplays.Clear();
             for(int i = content.childCount - 1; i >= 0; i--)
                 Destroy(content.GetChild(i).gameObject);
         }
@@ -175,15 +179,16 @@ namespace Sparkfire.Sample
             songDisplays.Clear();
             foreach(Transform child in content)
             {
-                if(child.TryGetComponent(out SongInfoDisplay songDisplay))
+                SongInfoDisplay songDisplay = child.GetComponentInChildren<SongInfoDisplay>();
+                if(songDisplay)
                 {
                     songDisplays.Add(songDisplay);
                     RectTransform rect = songDisplay.GetComponent<RectTransform>();
                     rect.sizeDelta = new Vector2(rect.sizeDelta.x, listEntryHeight);
                 }
             }
-            LayoutRebuilder.ForceRebuildLayoutImmediate(content);;
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             UpdateListEntryXOffsets();
         }
 
