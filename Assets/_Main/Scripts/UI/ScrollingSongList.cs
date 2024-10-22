@@ -12,7 +12,13 @@ namespace Sparkfire.Sample
     public class ScrollingSongList : MonoBehaviour
     {
         [Header("Runtime Data"), SerializeField]
-        private List<RectTransform> listItems;
+        private List<SongInfoDisplay> songDisplays;
+        [SerializeField]
+        private List<MusicData> currentSongList;
+        [SerializeField]
+        private int topIndex;
+        [SerializeField]
+        private int bottomIndex;
 
         [Header("Settings"), SerializeField]
         private float listEntryHeight = 100; // TODO - scale with screen size
@@ -35,6 +41,8 @@ namespace Sparkfire.Sample
         private RectTransform content => scrollRect.content;
         private RectTransform viewport => scrollRect.viewport;
 
+        private int MaxVisibleListEntries => Mathf.FloorToInt((maxHeightUp + maxHeightDown) / listEntryHeight);
+
         // ------------------------------
 
         #region Unity Functions
@@ -42,7 +50,7 @@ namespace Sparkfire.Sample
         private void Start()
         {
             scrollRect.onValueChanged.AddListener(CheckForLooping);
-            ValidateListEntries();
+            RebuildSongList();
         }
 
 #if UNITY_EDITOR
@@ -59,10 +67,41 @@ namespace Sparkfire.Sample
 
         #region List Add/Remove
 
-        public void AddEntry()
+        public void Initialize(List<MusicData> dataList)
         {
-            Instantiate(listEntryPrefab, transform);
-            ValidateListEntries();
+            ClearList();
+            if(dataList.Count == 0)
+                return;
+
+            currentSongList = dataList;
+            int currentIndex = 0;
+            for(int i = 0; i < MaxVisibleListEntries; i++)
+            {
+                SongInfoDisplay infoDisplay = Instantiate(listEntryPrefab, content).GetComponentInChildren<SongInfoDisplay>();
+                if(!infoDisplay)
+                {
+                    Debug.LogError($"Failed to find a SongInfoDisplay nested underneath prefab {listEntryPrefab.name}!");
+                    break;
+                }
+
+                MusicData data = currentSongList[currentIndex];
+                infoDisplay.SetInfo(data.SongName, data.DifficultyEZ.Difficulty);
+
+                currentIndex++;
+                if(currentIndex >= currentSongList.Count)
+                    currentIndex = 0;
+            }
+
+            topIndex = 0;
+            bottomIndex = currentIndex;
+
+            RebuildSongList();
+        }
+
+        public void ClearList()
+        {
+            for(int i = content.childCount - 1; i >= 0; i--)
+                Destroy(content.GetChild(i).gameObject);
         }
 
         #endregion
@@ -73,12 +112,12 @@ namespace Sparkfire.Sample
 
         public void UpdateListEntryXOffsets()
         {
-            foreach(RectTransform item in listItems)
+            foreach(Transform item in content)
             {
                 if(item.childCount == 0 || !item.GetChild(0).TryGetComponent(out RectTransform child))
                     return;
 
-                float yOffset = item.transform.position.y - transform.parent.TransformPoint(Vector3.zero).y;
+                float yOffset = item.transform.position.y - viewport.transform.parent.TransformPoint(Vector3.zero).y;
                 float yOffsetCount = yOffset / listEntryHeight;
                 child.anchoredPosition = new Vector2(yOffsetCount * xOffset, 0f);
             }
@@ -127,18 +166,19 @@ namespace Sparkfire.Sample
 
         // ------------------------------
 
-        #region Debug
+        #region Other
 
-        public void ValidateListEntries()
+        public void RebuildSongList()
         {
             content.anchoredPosition = new Vector2(content.anchoredPosition.x, 0f);
 
-            listItems.Clear();
+            songDisplays.Clear();
             foreach(Transform child in content)
             {
-                if(child.TryGetComponent(out RectTransform rect))
+                if(child.TryGetComponent(out SongInfoDisplay songDisplay))
                 {
-                    listItems.Add(rect);
+                    songDisplays.Add(songDisplay);
+                    RectTransform rect = songDisplay.GetComponent<RectTransform>();
                     rect.sizeDelta = new Vector2(rect.sizeDelta.x, listEntryHeight);
                 }
             }
