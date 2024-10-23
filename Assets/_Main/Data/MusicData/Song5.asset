@@ -16,17 +16,17 @@ MonoBehaviour:
   <Artist>k__BackingField: 
   <CoverArt>k__BackingField: {fileID: 0}
   <DifficultyEZ>k__BackingField:
-    <Difficulty>k__BackingField: 1
+    <Level>k__BackingField: 1
     <Score>k__BackingField: 0
     <Accuracy>k__BackingField: 0
     <Grade>k__BackingField: 
   <DifficultyHD>k__BackingField:
-    <Difficulty>k__BackingField: 5
+    <Level>k__BackingField: 10
     <Score>k__BackingField: 0
     <Accuracy>k__BackingField: 0
     <Grade>k__BackingField: 
   <DifficultyIN>k__BackingField:
-    <Difficulty>k__BackingField: 12
+    <Level>k__BackingField: 14
     <Score>k__BackingField: 0
     <Accuracy>k__BackingField: 0
     <Grade>k__BackingField: 

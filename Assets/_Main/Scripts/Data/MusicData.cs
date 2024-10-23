@@ -6,11 +6,13 @@ namespace Sparkfire.Sample
     [CreateAssetMenu(menuName = "MusicData", fileName = "NewMusicData", order = 1)]
     public class MusicData : ScriptableObject
     {
+        public enum Difficulty { EZ, HD, IN }
+
         [Serializable]
         public class DifficultyInfo
         {
             [field: SerializeField, Range(1, 16)]
-            public int Difficulty { get; private set; } = 1;
+            public int Level { get; private set; } = 1;
 
             // Normally this stuff should be stored separately from the song data, but for the UI showcase this is fine
             [field: Header("User Data"), SerializeField]
@@ -31,10 +33,24 @@ namespace Sparkfire.Sample
         public Sprite CoverArt { get; private set; }
 
         [field: SerializeField]
-        public DifficultyInfo DifficultyEZ { get; private set; }
+        private DifficultyInfo DifficultyEZ { get; set; }
         [field: SerializeField]
-        public DifficultyInfo DifficultyHD { get; private set; }
+        private DifficultyInfo DifficultyHD { get; set; }
         [field: SerializeField]
-        public DifficultyInfo DifficultyIN { get; private set; }
+        private DifficultyInfo DifficultyIN { get; set; }
+
+        // ------------------------------
+
+        public DifficultyInfo GetDifficultyInfo(Difficulty difficulty)
+        {
+            return difficulty switch
+            {
+                Difficulty.EZ => DifficultyEZ,
+                Difficulty.HD => DifficultyHD,
+                Difficulty.IN => DifficultyIN,
+                _ => null
+            }
+            ;
+        }
     }
 }

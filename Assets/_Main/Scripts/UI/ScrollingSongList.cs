@@ -88,15 +88,13 @@ namespace Sparkfire.Sample
                 }
 
                 MusicData data = currentSongList[currentIndex];
-                infoDisplay.SetInfo(data.SongName, data.DifficultyEZ.Difficulty);
+                infoDisplay.SetInfo(data.SongName, data.GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
 
-                currentIndex++;
-                if(currentIndex >= currentSongList.Count)
-                    currentIndex = 0;
+                LoopSongListIndex(ref currentIndex, 1);
             }
 
             topIndex = 0;
-            bottomIndex = currentIndex;
+            bottomIndex = currentIndex - 1;
 
             Invoke(nameof(RebuildSongList), 0f); // tbh not entirely sure why this fixes the rebuild on the same frame as initializing, but it works ig
         }
@@ -114,7 +112,7 @@ namespace Sparkfire.Sample
 
         #region List Movement
 
-        public void UpdateListEntryXOffsets()
+        private void UpdateListEntryXOffsets()
         {
             foreach(Transform item in content)
             {
@@ -144,19 +142,40 @@ namespace Sparkfire.Sample
             UpdateListEntryXOffsets();
         }
 
-        // Potential for optimization - instead of rebuilding layout groups, manually place each element as we re-order them
+        /// <summary>
+        /// Moves the bottom element of the list to the top of the list
+        /// </summary>
         private void LoopListBottom()
         {
-            content.GetChild(content.childCount - 1).SetAsFirstSibling();
+            // Move transform/scroll rect
+            content.GetChild(content.childCount - 1).SetAsFirstSibling(); // Potential for optimization - instead of rebuilding layout groups, manually place each element as we re-order them
             content.anchoredPosition += Vector2.up * listEntryHeight;
             UpdateScrollRectMouseStartPosition(-listEntryHeight);
+
+            // Update display list
+            songDisplays.Insert(0, songDisplays[^1]);
+            songDisplays.RemoveAt(songDisplays.Count - 1);
+            LoopSongListIndex(ref topIndex, -1);
+            LoopSongListIndex(ref bottomIndex, -1);
+            songDisplays[0].SetInfo(currentSongList[topIndex].SongName, currentSongList[topIndex].GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
         }
 
+        /// <summary>
+        /// Moves the top element of the list to the bottom end of the list
+        /// </summary>
         private void LoopListTop()
         {
+            // Move transform/scroll rect
             content.GetChild(0).SetAsLastSibling();
             content.anchoredPosition -= Vector2.up * listEntryHeight;
             UpdateScrollRectMouseStartPosition(listEntryHeight);
+
+            // Update display list
+            songDisplays.Add(songDisplays[0]);
+            songDisplays.RemoveAt(0);
+            LoopSongListIndex(ref topIndex, 1);
+            LoopSongListIndex(ref bottomIndex, 1);
+            songDisplays[^1].SetInfo(currentSongList[bottomIndex].SongName, currentSongList[bottomIndex].GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
         }
 
         private void UpdateScrollRectMouseStartPosition(float offset)
@@ -190,6 +209,18 @@ namespace Sparkfire.Sample
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             UpdateListEntryXOffsets();
+        }
+
+        /// <summary>
+        /// Loops given index relative by the given amount to the current song list count (if bigger, loops to 0; if lower, loops to top)
+        /// </summary>
+        private void LoopSongListIndex(ref int index, int increment)
+        {
+            index += increment;
+            if(index < 0)
+                index += currentSongList.Count;
+            else if(index >= currentSongList.Count)
+                index -= currentSongList.Count;
         }
 
         #endregion

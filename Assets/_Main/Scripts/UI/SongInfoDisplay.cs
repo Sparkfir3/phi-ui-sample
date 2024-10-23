@@ -19,15 +19,15 @@ namespace Sparkfire.Sample
 
         // ------------------------------
 
-        public void SetInfo(string songName, int difficulty) => SetInfo(songName, "", difficulty, "");
+        public void SetInfo(string songName, int level) => SetInfo(songName, "", level, "");
 
-        public void SetInfo(string songName, string artist, int difficulty, string difficultyName)
+        public void SetInfo(string songName, string artist, int level, string difficultyName)
         {
             songNameTextBox.text = songName;
             if(songArtistTextBox)
                 songArtistTextBox.text = artist;
 
-            difficultyNumberTextBox.text = difficulty.ToString();
+            difficultyNumberTextBox.text = level.ToString();
             if(difficultyNameTextBox)
                 difficultyNameTextBox.text = difficultyName;
         }
