@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Sparkfire.Sample
@@ -29,9 +28,7 @@ namespace Sparkfire.Sample
         [SerializeField]
         private float maxHeightDown = 600;
         [SerializeField]
-        private bool loopTop = true;
-        [SerializeField]
-        private bool loopBottom = true;
+        private bool infiniteLoopedScrolling;
 
         [Header("Object References"), SerializeField]
         private GameObject listEntryPrefab;
@@ -81,6 +78,7 @@ namespace Sparkfire.Sample
             for(int i = 0; i < MaxVisibleListEntries; i++)
             {
                 SongInfoDisplay infoDisplay = Instantiate(listEntryPrefab, content).GetComponentInChildren<SongInfoDisplay>();
+                infoDisplay.gameObject.name = $"SongInfoDisplay {i.ToString()}";
                 if(!infoDisplay)
                 {
                     Debug.LogError($"Failed to find a SongInfoDisplay nested underneath prefab {listEntryPrefab.name}!");
@@ -129,16 +127,30 @@ namespace Sparkfire.Sample
         {
             if(content.childCount == 0)
                 return;
+            bool layoutGroupDirty = false;
 
             // Check lower bound
-            Transform lastChild = content.GetChild(content.childCount - 1);
-            if(loopBottom && lastChild.transform.position.y - viewport.transform.position.y < -maxHeightDown)
-                LoopListBottom();
-            // Check lower bound
-            else if(loopTop && content.GetChild(0).transform.position.y - viewport.transform.position.y > maxHeightUp)
-                LoopListTop();
+            if(infiniteLoopedScrolling || topIndex > 0)
+            {
+                Transform lastChild = content.GetChild(content.childCount - 1);
+                if(lastChild.transform.position.y - viewport.transform.position.y < -maxHeightDown)
+                {
+                    LoopListBottom();
+                    layoutGroupDirty = true;
+                }
+            }
+            // Check upper bound
+            if(infiniteLoopedScrolling || bottomIndex < currentSongList.Count - 1)
+            {
+                if(content.GetChild(0).transform.position.y - viewport.transform.position.y > maxHeightUp)
+                {
+                    LoopListTop();
+                    layoutGroupDirty = true;
+                }
+            }
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            if(layoutGroupDirty) // Potential for optimization - instead of rebuilding layout groups, manually place each element as we re-order them
+                LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             UpdateListEntryXOffsets();
         }
 
@@ -148,7 +160,7 @@ namespace Sparkfire.Sample
         private void LoopListBottom()
         {
             // Move transform/scroll rect
-            content.GetChild(content.childCount - 1).SetAsFirstSibling(); // Potential for optimization - instead of rebuilding layout groups, manually place each element as we re-order them
+            content.GetChild(content.childCount - 1).SetAsFirstSibling();
             content.anchoredPosition += Vector2.up * listEntryHeight;
             UpdateScrollRectMouseStartPosition(-listEntryHeight);
 

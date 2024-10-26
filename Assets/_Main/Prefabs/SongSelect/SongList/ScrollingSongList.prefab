@@ -148,8 +148,7 @@ MonoBehaviour:
   xOffset: 28
   maxHeightUp: 600
   maxHeightDown: 800
-  loopTop: 1
-  loopBottom: 1
+  infiniteLoopedScrolling: 0
   listEntryPrefab: {fileID: 486697368739717921, guid: 31f0111c6661c0f40ac4ab5c1ef5409e, type: 3}
   scrollRect: {fileID: 3063260271904220034}
 --- !u!114 &3063260271904220034

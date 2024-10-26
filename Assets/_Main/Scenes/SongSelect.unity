@@ -871,6 +871,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8e61362da307cb94696fc9591a92bf23, type: 2}
   - {fileID: 11400000, guid: 844c1ae1af554284cb61d15a0e0b2961, type: 2}
   - {fileID: 11400000, guid: 4327a899018ef994a911a56b3dc6002f, type: 2}
+  - {fileID: 11400000, guid: caf8117e618bee8429285e01ac312e3d, type: 2}
+  - {fileID: 11400000, guid: b4a9c204bdae9c941aa1075229bbe4c6, type: 2}
+  - {fileID: 11400000, guid: 727fc28f5de4af740a945809e7dc98e0, type: 2}
+  - {fileID: 11400000, guid: 567b05a1ca290b649bf725fbf349112d, type: 2}
+  - {fileID: 11400000, guid: 98aaf59feaf4ef846ae9c97b76c45066, type: 2}
   songList: {fileID: 1673236841}
   coverImage: {fileID: 49832580}
 --- !u!1 &1746478992
