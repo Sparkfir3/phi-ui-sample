@@ -134,6 +134,9 @@ MonoBehaviour:
   maxHeightUp: 600
   maxHeightDown: 800
   infiniteLoopedScrolling: 0
+  snapSpeed: 250
+  stoppedVelocityThreshold: 75
+  stoppedVelocityTimerDuration: 0.15
   listEntryPrefab: {fileID: 486697368739717921, guid: 31f0111c6661c0f40ac4ab5c1ef5409e, type: 3}
   scrollRect: {fileID: 3063260271904220034}
   layoutGroup: {fileID: 5574526246299534058}

@@ -30,20 +30,35 @@ namespace Sparkfire.Sample
         private float maxHeightDown = 600;
         [SerializeField]
         private bool infiniteLoopedScrolling;
+        [SerializeField]
+        private float snapSpeed = 1000f;
+        [SerializeField]
+        private float stoppedVelocityThreshold = 10f;
+        [SerializeField]
+        private float stoppedVelocityTimerDuration = 1f;
 
         [Header("Object References"), SerializeField]
         private GameObject listEntryPrefab;
         [SerializeField]
         private ScrollRect scrollRect;
         [SerializeField]
-        private VerticalLayoutGroup layoutGroup;
+        private VerticalLayoutGroup layoutGroup; // TODO - use layout group to account for padding and spacing
+
+        // ---
 
         private RectTransform content => scrollRect.content;
         private RectTransform viewport => scrollRect.viewport;
-
         private int MaxVisibleListEntries => Mathf.FloorToInt((maxHeightUp + maxHeightDown) / listEntryHeight);
 
+        private float stoppedVelocityTimer;
+        private bool isSnapping;
+        private bool scrollRectDirty;
+
         public event Action onValueChanged;
+
+        // Reflection
+        private FieldInfo field_PointerStartLocalCursor;
+        private FieldInfo field_Dragging;
 
         // ------------------------------
 
@@ -55,7 +70,31 @@ namespace Sparkfire.Sample
             Debug.Assert(scrollRect.content && scrollRect.content.GetComponent<VerticalLayoutGroup>(), "ScrollRect Content was not initialized correctly. " +
                 "Either the reference is not set, or it does not have a VerticalLayoutGroup component attached!");
 
-            scrollRect.onValueChanged.AddListener(CheckForLooping);
+            scrollRect.onValueChanged.AddListener(ScrollRectValueChanged);
+            InitReflectionVariables();
+        }
+
+        private void LateUpdate()
+        {
+            if(!scrollRectDirty || isSnapping)
+                return;
+            if(scrollRect.velocity.magnitude > stoppedVelocityThreshold
+               || scrollRect.verticalNormalizedPosition < 0f || scrollRect.verticalNormalizedPosition > 1f) // let scroll rect snap naturally if out of normalized range
+            {
+                stoppedVelocityTimer = 0f;
+                return;
+            }
+
+            if(scrollRect.velocity.magnitude <= stoppedVelocityThreshold)
+            {
+                stoppedVelocityTimer += Time.deltaTime;
+                if(stoppedVelocityTimer >= stoppedVelocityTimerDuration && !IsScrollRectDragging)
+                    SnapToSong(GetCurrentSelectedSong());
+            }
+            else
+            {
+                stoppedVelocityTimer = 0f;
+            }
         }
 
 #if UNITY_EDITOR
@@ -106,7 +145,7 @@ namespace Sparkfire.Sample
         {
             songDisplays.Clear();
             for(int i = content.childCount - 1; i >= 0; i--)
-                Destroy(content.GetChild(i).gameObject);
+                Destroy(content.GetChild(i).gameObject); // Optimization pass - reuse elements instead of delete and recreate
         }
 
         #endregion
@@ -176,22 +215,30 @@ namespace Sparkfire.Sample
             }
 
             scrollRect.velocity = Vector2.zero;
-            StartCoroutine(MoveListOverTime(distanceToMove, 5000f, () =>
+            StartCoroutine(MoveListOverTime(distanceToMove, snapSpeed, () =>
             {
                 scrollRect.velocity = Vector2.zero;
+                scrollRectDirty = false;
             }));
         }
 
         private IEnumerator MoveListOverTime(float distance, float speed, Action onComplete = null)
         {
+            isSnapping = true;
             speed *= Mathf.Sign(distance);
             float duration = Mathf.Abs(distance / speed);
 
             for(float i = 0f; i < duration; i += Time.deltaTime)
             {
+                if(IsScrollRectDragging)
+                {
+                    isSnapping = false;
+                    yield break;
+                }
                 content.anchoredPosition += speed * Time.deltaTime * Vector2.up;
                 yield return null;
             }
+            isSnapping = false;
             onComplete?.Invoke();
         }
 
@@ -208,7 +255,20 @@ namespace Sparkfire.Sample
             }
         }
 
-        private void CheckForLooping(Vector2 value)
+        private void ScrollRectValueChanged(Vector2 value)
+        {
+            scrollRectDirty = true;
+            CheckForLooping();
+            onValueChanged?.Invoke();
+        }
+
+        #endregion
+
+        // ------------------------------
+
+        #region List Looping
+
+        private void CheckForLooping()
         {
             if(content.childCount == 0)
                 return;
@@ -237,7 +297,6 @@ namespace Sparkfire.Sample
             if(layoutGroupDirty) // Potential for optimization - instead of rebuilding layout groups, manually place each element as we re-order them
                 LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             UpdateListEntryXOffsets();
-            onValueChanged?.Invoke();
         }
 
         /// <summary>
@@ -276,12 +335,28 @@ namespace Sparkfire.Sample
             songDisplays[^1].SetInfo(currentSongList[bottomIndex].SongName, currentSongList[bottomIndex].GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
         }
 
+        #endregion
+
+        // ------------------------------
+
+        #region ScrollRect Reflection
+
+        // This has the potential be a performance problem, but it's probably fine. probably.
+        // Solution would be to override the ScrollRect in a new class to expose the variables we need, but this works for now
+        private void InitReflectionVariables()
+        {
+            field_PointerStartLocalCursor = typeof(ScrollRect).GetField("m_PointerStartLocalCursor",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            field_Dragging = typeof(ScrollRect).GetField("m_Dragging",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
         private void UpdateScrollRectMouseStartPosition(float offset)
         {
-            FieldInfo field = typeof(ScrollRect).GetField("m_PointerStartLocalCursor",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            field.SetValue(scrollRect, (Vector2)field.GetValue(scrollRect) + Vector2.up * offset);
+            field_PointerStartLocalCursor.SetValue(scrollRect, (Vector2)field_PointerStartLocalCursor.GetValue(scrollRect) + Vector2.up * offset);
         }
+
+        public bool IsScrollRectDragging => (bool)field_Dragging.GetValue(scrollRect);
 
         #endregion
 
