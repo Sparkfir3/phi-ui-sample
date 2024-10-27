@@ -136,6 +136,65 @@ namespace Sparkfire.Sample
 
         #region List Movement
 
+        private void Update()
+        {
+            if(Input.GetKeyDown(KeyCode.Space))
+            {
+                SnapToSong(currentSongList[1]);
+            }
+        }
+
+        public void SnapToSong(MusicData targetSong)
+        {
+            if(!currentSongList.Contains(targetSong))
+                return;
+            SnapToSong(currentSongList.IndexOf(targetSong));
+        }
+
+        public void SnapToSong(int index)
+        {
+            int subListIndex = index - topIndex;
+            bool isTargetSongVisible = subListIndex < content.childCount && subListIndex >= 0;
+            float distanceToMove;
+            if(isTargetSongVisible)
+            {
+                distanceToMove = viewport.transform.position.y - content.GetChild(subListIndex).transform.position.y;
+            }
+            else
+            {
+                bool isAboveList = subListIndex < 0;
+                if(isAboveList)
+                {
+                    distanceToMove = viewport.transform.position.y - content.GetChild(0).transform.position.y;
+                    distanceToMove += subListIndex * listEntryHeight;
+                }
+                else
+                {
+                    distanceToMove = viewport.transform.position.y - content.GetChild(content.childCount - 1).transform.position.y;
+                    distanceToMove += (subListIndex - content.childCount) * listEntryHeight;
+                }
+            }
+
+            scrollRect.velocity = Vector2.zero;
+            StartCoroutine(MoveListOverTime(distanceToMove, 5000f, () =>
+            {
+                scrollRect.velocity = Vector2.zero;
+            }));
+        }
+
+        private IEnumerator MoveListOverTime(float distance, float speed, Action onComplete = null)
+        {
+            speed *= Mathf.Sign(distance);
+            float duration = Mathf.Abs(distance / speed);
+
+            for(float i = 0f; i < duration; i += Time.deltaTime)
+            {
+                content.anchoredPosition += speed * Time.deltaTime * Vector2.up;
+                yield return null;
+            }
+            onComplete?.Invoke();
+        }
+
         private void UpdateListEntryXOffsets()
         {
             foreach(Transform item in content)

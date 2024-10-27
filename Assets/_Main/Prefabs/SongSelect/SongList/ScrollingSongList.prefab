@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2601552456650633181}
   - component: {fileID: 5574526246299534058}
-  - component: {fileID: 793202575755837570}
   m_Layer: 5
   m_Name: ScrollingListContent
   m_TagString: Untagged
@@ -48,7 +47,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 750, y: 1365}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5574526246299534058
 MonoBehaviour:
@@ -76,20 +75,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &793202575755837570
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3023849130289844013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 2
 --- !u!1 &3436351118527212701
 GameObject:
   m_ObjectHideFlags: 0
@@ -151,6 +136,7 @@ MonoBehaviour:
   infiniteLoopedScrolling: 0
   listEntryPrefab: {fileID: 486697368739717921, guid: 31f0111c6661c0f40ac4ab5c1ef5409e, type: 3}
   scrollRect: {fileID: 3063260271904220034}
+  layoutGroup: {fileID: 5574526246299534058}
 --- !u!114 &3063260271904220034
 MonoBehaviour:
   m_ObjectHideFlags: 0
