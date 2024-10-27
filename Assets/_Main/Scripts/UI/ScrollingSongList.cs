@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,11 +35,15 @@ namespace Sparkfire.Sample
         private GameObject listEntryPrefab;
         [SerializeField]
         private ScrollRect scrollRect;
+        [SerializeField]
+        private VerticalLayoutGroup layoutGroup;
 
         private RectTransform content => scrollRect.content;
         private RectTransform viewport => scrollRect.viewport;
 
         private int MaxVisibleListEntries => Mathf.FloorToInt((maxHeightUp + maxHeightDown) / listEntryHeight);
+
+        public event Action onValueChanged;
 
         // ------------------------------
 
@@ -108,6 +113,27 @@ namespace Sparkfire.Sample
 
         // ------------------------------
 
+        #region Read Data
+
+        public MusicData GetCurrentSelectedSong()
+        {
+            float centerDistanceFromTop = (content.rect.height / 2f) + (listEntryHeight / 2f) + content.anchoredPosition.y; // distance from top of content to "center" of the list
+            int indexAboveCenter = Mathf.FloorToInt((centerDistanceFromTop) / listEntryHeight) - 1;
+            if(indexAboveCenter >= songDisplays.Count - 1)
+                return currentSongList[bottomIndex];
+            if(indexAboveCenter < 0)
+                return currentSongList[topIndex];
+
+            float itemAboveDistance = Mathf.Abs(content.GetChild(indexAboveCenter).transform.position.y - viewport.transform.position.y);
+            float itemBelowDistance = Mathf.Abs(content.GetChild(indexAboveCenter + 1).transform.position.y - viewport.transform.position.y);
+
+            return itemAboveDistance <= itemBelowDistance ? currentSongList[indexAboveCenter + topIndex] : currentSongList[indexAboveCenter + topIndex + 1];
+        }
+
+        #endregion
+
+        // ------------------------------
+
         #region List Movement
 
         private void UpdateListEntryXOffsets()
@@ -152,6 +178,7 @@ namespace Sparkfire.Sample
             if(layoutGroupDirty) // Potential for optimization - instead of rebuilding layout groups, manually place each element as we re-order them
                 LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             UpdateListEntryXOffsets();
+            onValueChanged?.Invoke();
         }
 
         /// <summary>
@@ -221,6 +248,7 @@ namespace Sparkfire.Sample
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             UpdateListEntryXOffsets();
+            onValueChanged?.Invoke();
         }
 
         /// <summary>

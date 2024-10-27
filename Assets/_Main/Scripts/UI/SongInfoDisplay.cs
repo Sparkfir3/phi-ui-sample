@@ -19,6 +19,7 @@ namespace Sparkfire.Sample
 
         // ------------------------------
 
+        public void SetInfo(MusicData data, MusicData.Difficulty difficulty) => SetInfo(data.SongName, data.Artist, data.GetDifficultyInfo(difficulty).Level, difficulty.ToString());
         public void SetInfo(string songName, int level) => SetInfo(songName, "", level, "");
 
         public void SetInfo(string songName, string artist, int level, string difficultyName)
