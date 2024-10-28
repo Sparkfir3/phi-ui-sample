@@ -16,6 +16,8 @@ namespace Sparkfire.Sample
         [SerializeField]
         private List<MusicData> currentSongList;
         [SerializeField]
+        private MusicData.Difficulty currentDifficulty;
+        [SerializeField]
         private int topIndex;
         [SerializeField]
         private int bottomIndex;
@@ -109,15 +111,16 @@ namespace Sparkfire.Sample
 
         // ------------------------------
 
-        #region List Add/Remove
+        #region List Set Data
 
-        public void Initialize(List<MusicData> dataList)
+        public void Initialize(List<MusicData> dataList, MusicData.Difficulty difficulty)
         {
             ClearList();
             if(dataList.Count == 0)
                 return;
 
             currentSongList = dataList;
+            currentDifficulty = difficulty;
             int currentIndex = 0;
             for(int i = 0; i < MaxVisibleListEntries; i++)
             {
@@ -130,7 +133,7 @@ namespace Sparkfire.Sample
                 }
 
                 MusicData data = currentSongList[currentIndex];
-                infoDisplay.SetInfo(data.SongName, data.GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
+                infoDisplay.SetInfo(data.SongName, data.GetDifficultyInfo(difficulty).Level);
 
                 LoopSongListIndex(ref currentIndex, 1);
             }
@@ -146,6 +149,15 @@ namespace Sparkfire.Sample
             songDisplays.Clear();
             for(int i = content.childCount - 1; i >= 0; i--)
                 Destroy(content.GetChild(i).gameObject); // Optimization pass - reuse elements instead of delete and recreate
+        }
+
+        public void SetDifficulty(MusicData.Difficulty difficulty)
+        {
+            for(int i = 0; i < songDisplays.Count; i++)
+            {
+                songDisplays[i].SetDifficultyInfo(currentSongList[i + topIndex].GetDifficultyInfo(difficulty).Level);
+            }
+            currentDifficulty = difficulty;
         }
 
         #endregion
@@ -314,7 +326,7 @@ namespace Sparkfire.Sample
             songDisplays.RemoveAt(songDisplays.Count - 1);
             LoopSongListIndex(ref topIndex, -1);
             LoopSongListIndex(ref bottomIndex, -1);
-            songDisplays[0].SetInfo(currentSongList[topIndex].SongName, currentSongList[topIndex].GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
+            songDisplays[0].SetInfo(currentSongList[topIndex].SongName, currentSongList[topIndex].GetDifficultyInfo(currentDifficulty).Level);
         }
 
         /// <summary>
@@ -332,7 +344,7 @@ namespace Sparkfire.Sample
             songDisplays.RemoveAt(0);
             LoopSongListIndex(ref topIndex, 1);
             LoopSongListIndex(ref bottomIndex, 1);
-            songDisplays[^1].SetInfo(currentSongList[bottomIndex].SongName, currentSongList[bottomIndex].GetDifficultyInfo(MusicData.Difficulty.EZ).Level);
+            songDisplays[^1].SetInfo(currentSongList[bottomIndex].SongName, currentSongList[bottomIndex].GetDifficultyInfo(currentDifficulty).Level);
         }
 
         #endregion
