@@ -97,10 +97,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1366212202305721293}
+  - component: {fileID: 2128424129094913215}
   - component: {fileID: 8946820916706204284}
   - component: {fileID: 941812272160417233}
   - component: {fileID: 3519232913710015212}
-  - component: {fileID: 2128424129094913215}
+  - component: {fileID: 7979406271282744291}
   m_Layer: 5
   m_Name: DifficultSelection
   m_TagString: Untagged
@@ -131,6 +132,52 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 265, y: 80}
   m_Pivot: {x: 0, y: 0.5}
+--- !u!114 &2128424129094913215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6375214527753224640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32da416baf3f38744901c51f4abf8ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ezColor: {r: 0.27058825, g: 0.65882355, b: 0.17254902, a: 1}
+  hdColor: {r: 0.19215687, g: 0.45882353, b: 0.69411767, a: 1}
+  inColor: {r: 0.8867924, g: 0.14364666, b: 0.10457456, a: 1}
+  changeDifficultySlideDuration: 0.33
+  changeDifficultySlideCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ezButton: {fileID: 578218483315425298}
+  hdButton: {fileID: 1304819898776448936}
+  inButton: {fileID: 6012591757580122894}
+  currentDifficultySlider: {fileID: 2310031204723278243}
+  currentDifficultyImage: {fileID: 8417624517728189318}
+  currentDifficultyInfoBox: {fileID: 4723964096856836948}
 --- !u!222 &8946820916706204284
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -178,7 +225,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 3
-  m_Spacing: 0
+  m_Spacing: 30
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -186,7 +233,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &2128424129094913215
+--- !u!114 &7979406271282744291
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -195,15 +242,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6375214527753224640}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32da416baf3f38744901c51f4abf8ff1, type: 3}
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentSelectedDifficulty: 0
-  ezButton: {fileID: 578218483315425298}
-  hdButton: {fileID: 1304819898776448936}
-  inButton: {fileID: 6012591757580122894}
-  currentDifficultySlider: {fileID: 2310031204723278243}
-  currentDifficultyInfoBox: {fileID: 4723964096856836948}
+  m_HorizontalFit: 2
+  m_VerticalFit: 0
 --- !u!1001 &368347753738115181
 PrefabInstance:
   m_ObjectHideFlags: 0

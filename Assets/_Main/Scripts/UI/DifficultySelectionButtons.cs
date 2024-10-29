@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,17 @@ namespace Sparkfire.Sample
 {
     public class DifficultySelectionButtons : MonoBehaviour
     {
+        [Header("Settings"), SerializeField]
+        private Color ezColor = Color.white;
+        [SerializeField]
+        private Color hdColor = Color.white;
+        [SerializeField]
+        private Color inColor = Color.white;
+        [SerializeField]
+        private float changeDifficultySlideDuration = 0.25f;
+        [SerializeField]
+        private AnimationCurve changeDifficultySlideCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
         [Header("Object References"), SerializeField]
         private DifficultyInfoBox ezButton;
         [SerializeField]
@@ -16,6 +28,8 @@ namespace Sparkfire.Sample
         private DifficultyInfoBox inButton;
         [SerializeField]
         private RectTransform currentDifficultySlider;
+        [SerializeField]
+        private MaskableGraphic currentDifficultyImage;
         [SerializeField]
         private DifficultyInfoBox currentDifficultyInfoBox;
 
@@ -29,7 +43,8 @@ namespace Sparkfire.Sample
             {
                 GetDifficultyInfoBox(difficulty).onClick += () => ChangeDifficulty(difficulty);
             }
-            //MoveDifficultySlider(startingDifficulty, true); // TODO - proper anchoring on start
+            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>()); // must rebuild immediate so that positions are accurate when we try to snap on the first frame
+            MoveDifficultySlider(startingDifficulty, true);
         }
 
         public void SetDifficultyInfo(MusicData data, MusicData.Difficulty difficulty)
@@ -57,6 +72,17 @@ namespace Sparkfire.Sample
             };
         }
 
+        private Color GetDifficultyColor(MusicData.Difficulty difficulty)
+        {
+            return difficulty switch
+            {
+                MusicData.Difficulty.EZ => ezColor,
+                MusicData.Difficulty.HD => hdColor,
+                MusicData.Difficulty.IN => inColor,
+                _ => Color.white
+            };
+        }
+
         private void ChangeDifficulty(MusicData.Difficulty difficulty)
         {
             onChangeDifficultyClicked?.Invoke(difficulty);
@@ -64,7 +90,16 @@ namespace Sparkfire.Sample
 
         private void MoveDifficultySlider(MusicData.Difficulty difficulty, bool instant = false)
         {
-            currentDifficultySlider.anchoredPosition = GetDifficultyInfoBox(difficulty).GetComponent<RectTransform>().anchoredPosition;
+            if(instant)
+            {
+                currentDifficultySlider.transform.position = GetDifficultyInfoBox(difficulty).transform.position;
+                currentDifficultyImage.color = GetDifficultyColor(difficulty);
+                return;
+            }
+
+            currentDifficultySlider.transform.DOKill();
+            currentDifficultySlider.transform.DOMove(GetDifficultyInfoBox(difficulty).transform.position, changeDifficultySlideDuration).SetEase(changeDifficultySlideCurve);
+            currentDifficultyImage.DOColor(GetDifficultyColor(difficulty), changeDifficultySlideDuration).SetEase(changeDifficultySlideCurve);
         }
     }
 }

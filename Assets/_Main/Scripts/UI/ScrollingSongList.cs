@@ -155,7 +155,7 @@ namespace Sparkfire.Sample
         {
             for(int i = 0; i < songDisplays.Count; i++)
             {
-                songDisplays[i].SetDifficultyInfo(currentSongList[i + topIndex].GetDifficultyInfo(difficulty).Level);
+                songDisplays[i].SetDifficultyLevel(currentSongList[i + topIndex].GetDifficultyInfo(difficulty).Level);
             }
             currentDifficulty = difficulty;
         }

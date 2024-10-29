@@ -28,11 +28,11 @@ namespace Sparkfire.Sample
             if(songArtistTextBox)
                 songArtistTextBox.text = artist;
 
-            SetDifficultyInfo(level, difficultyName);
+            SetDifficultyLevel(level, difficultyName);
         }
 
-        public void SetDifficultyInfo(int level) => SetDifficultyInfo(level, "");
-        public void SetDifficultyInfo(int level, string difficultyName)
+        public void SetDifficultyLevel(int level) => SetDifficultyLevel(level, "");
+        public void SetDifficultyLevel(int level, string difficultyName)
         {
             difficultyNumberTextBox.text = level.ToString();
             if(difficultyNameTextBox)

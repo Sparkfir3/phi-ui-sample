@@ -56,7 +56,12 @@ namespace Sparkfire.Sample
         private void UpdateDifficulty(MusicData.Difficulty newDifficulty)
         {
             currentDifficulty = newDifficulty;
+            MusicData.DifficultyInfo difficultyInfo = currentSongData.GetDifficultyInfo(currentDifficulty);
+
+            songList.SetDifficulty(newDifficulty);
+            currentSongDisplay.SetDifficultyLevel(difficultyInfo.Level, newDifficulty.ToString());
             difficultySelectButtons.SetDifficultyInfo(currentSongData, newDifficulty);
+            scoreDisplay.SetInfo(difficultyInfo.Score, difficultyInfo.Accuracy, difficultyInfo.Grade);
         }
     }
 }
