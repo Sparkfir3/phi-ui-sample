@@ -23,6 +23,8 @@ namespace Sparkfire.Sample
         private Image coverImage;
         [SerializeField]
         private ScoreDisplay scoreDisplay;
+        [SerializeField]
+        private DifficultySelectionButtons difficultySelectButtons;
 
         // ------------------------------
 
@@ -30,6 +32,9 @@ namespace Sparkfire.Sample
         {
             songList.Initialize(musicData, currentDifficulty);
             songList.onValueChanged += UpdateCurrentSong;
+
+            difficultySelectButtons.Initialize(currentDifficulty);
+            difficultySelectButtons.onChangeDifficultyClicked += UpdateDifficulty;
         }
 
         // ------------------------------
@@ -45,6 +50,13 @@ namespace Sparkfire.Sample
             currentSongDisplay.SetInfo(currentSongData, currentDifficulty);
             scoreDisplay.SetInfo(difficultyInfo.Score, difficultyInfo.Accuracy, difficultyInfo.Grade);
             coverImage.sprite = currentSongData.CoverArt;
+            difficultySelectButtons.SetDifficultyInfo(currentSongData, currentDifficulty);
+        }
+
+        private void UpdateDifficulty(MusicData.Difficulty newDifficulty)
+        {
+            currentDifficulty = newDifficulty;
+            difficultySelectButtons.SetDifficultyInfo(currentSongData, newDifficulty);
         }
     }
 }
