@@ -214,7 +214,7 @@ GameObject:
   - component: {fileID: 225654728698471902}
   - component: {fileID: 5842501181352998739}
   m_Layer: 5
-  m_Name: SongTitleDisplay
+  m_Name: SongInfo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

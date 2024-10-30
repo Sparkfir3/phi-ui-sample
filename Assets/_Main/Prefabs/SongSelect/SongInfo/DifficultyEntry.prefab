@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7166339162666737681}
   - component: {fileID: 2873088897486494589}
-  - component: {fileID: 4240685302928537522}
+  - component: {fileID: 6227816431893783395}
   m_Layer: 5
   m_Name: DifficultyEntry
   m_TagString: Untagged
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &4240685302928537522
+--- !u!114 &6227816431893783395
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -74,11 +74,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1858734551905300360}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Script: {fileID: 11500000, guid: 4347bdeb2106d1942ae0f2d7e2ce02c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
-  m_VerticalFit: 2
+  button: {fileID: 0}
+  difficultyLevelTextBox: {fileID: 4521090595431506578}
+  difficultyNameTextBox: {fileID: 6336223606013698115}
 --- !u!1 &4638119860359202037
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,7 +312,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 16
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

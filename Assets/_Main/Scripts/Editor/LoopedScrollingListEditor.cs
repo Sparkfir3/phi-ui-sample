@@ -13,13 +13,9 @@ namespace Sparkfire.Sample
             base.OnInspectorGUI();
             ScrollingSongList obj = target as ScrollingSongList;
 
-            if(Application.isPlaying && GUILayout.Button("Add"))
-            {
-                obj.AddEntry();
-            }
             if(GUILayout.Button("Validate List"))
             {
-                obj.ValidateListEntries();
+                obj.RebuildSongList();
             }
         }
     }
