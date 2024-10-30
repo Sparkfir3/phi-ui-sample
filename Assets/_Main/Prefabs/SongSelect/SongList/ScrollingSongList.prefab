@@ -147,7 +147,6 @@ MonoBehaviour:
   xOffset: 28
   maxElementsUp: 5
   maxElementsDown: 6
-  infiniteLoopedScrolling: 0
   snapSpeed: 250
   stoppedVelocityThreshold: 75
   stoppedVelocityTimerDuration: 0.15

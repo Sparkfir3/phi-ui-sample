@@ -23,7 +23,7 @@ namespace Sparkfire.Sample
         private int bottomIndex;
 
         [Header("Settings"), SerializeField]
-        private float listEntryHeight = 100; // TODO - scale with screen size
+        private float listEntryHeight = 100;
         [SerializeField]
         private float xOffset;
         [SerializeField]
@@ -31,13 +31,13 @@ namespace Sparkfire.Sample
         [SerializeField]
         private int maxElementsDown = 7;
         [SerializeField]
-        private bool infiniteLoopedScrolling;
-        [SerializeField]
         private float snapSpeed = 1000f;
         [SerializeField]
         private float stoppedVelocityThreshold = 10f;
         [SerializeField]
         private float stoppedVelocityTimerDuration = 1f;
+        // [SerializeField] // This breaks things that we added later so we'll just disable it for now, don't really need it anyways it's just nice to have
+        private bool infiniteLoopedScrolling;
 
         [Header("Object References"), SerializeField]
         private GameObject listEntryPrefab;
@@ -170,17 +170,19 @@ namespace Sparkfire.Sample
 
         public MusicData GetCurrentSelectedSong()
         {
-            float centerDistanceFromTop = (content.rect.height / 2f) + (listEntryHeight / 2f) + content.anchoredPosition.y; // distance from top of content to "center" of the list
-            int indexAboveCenter = Mathf.FloorToInt((centerDistanceFromTop) / listEntryHeight) - 1;
-            if(indexAboveCenter >= songDisplays.Count - 1)
+            float centerDistanceFromTop = (content.rect.height / 2f) + (listEntryHeight / 2f) + content.anchoredPosition.y; // distance from top of content to "center" of the list (viewport 0)
+            int listIndexAboveCenter = Mathf.FloorToInt(centerDistanceFromTop / (listEntryHeight + layoutGroup.spacing)) - 1;
+            if(listIndexAboveCenter >= songDisplays.Count - 1)
                 return currentSongList[bottomIndex];
-            if(indexAboveCenter < 0)
+            if(listIndexAboveCenter < 0)
                 return currentSongList[topIndex];
 
-            float itemAboveDistance = Mathf.Abs(content.GetChild(indexAboveCenter).transform.position.y - viewport.transform.position.y);
-            float itemBelowDistance = Mathf.Abs(content.GetChild(indexAboveCenter + 1).transform.position.y - viewport.transform.position.y);
+            float itemAboveDistance = Mathf.Abs(content.GetChild(listIndexAboveCenter).transform.position.y - viewport.transform.position.y);
+            float itemBelowDistance = Mathf.Abs(content.GetChild(listIndexAboveCenter + 1).transform.position.y - viewport.transform.position.y);
 
-            return itemAboveDistance <= itemBelowDistance ? currentSongList[indexAboveCenter + topIndex] : currentSongList[indexAboveCenter + topIndex + 1];
+            int songIndexAboveCenter = listIndexAboveCenter + topIndex;
+            LoopSongListIndex(ref songIndexAboveCenter);
+            return itemAboveDistance <= itemBelowDistance ? currentSongList[songIndexAboveCenter] : currentSongList[LoopSongListIndex(ref songIndexAboveCenter, 1)];
         }
 
         #endregion
@@ -189,21 +191,36 @@ namespace Sparkfire.Sample
 
         #region List Movement
 
-        public void SnapToSong(MusicData targetSong)
+        private void Update()
+        {
+            if(Input.GetKeyDown(KeyCode.Space))
+            {
+                SnapToSong(GetCurrentSelectedSong());
+            }
+        }
+
+        public void SnapToSong(MusicData targetSong, bool instant = false)
         {
             if(!currentSongList.Contains(targetSong))
                 return;
-            SnapToSong(currentSongList.IndexOf(targetSong));
+            SnapToSong(currentSongList.IndexOf(targetSong), instant);
         }
 
-        public void SnapToSong(int index)
+        public void SnapToSong(int index, bool instant = false)
         {
+            scrollRect.velocity = Vector2.zero;
+
             int subListIndex = index - topIndex;
             bool isTargetSongVisible = subListIndex < content.childCount && subListIndex >= 0;
             float distanceToMove;
             if(isTargetSongVisible)
             {
                 distanceToMove = viewport.transform.position.y - content.GetChild(subListIndex).transform.position.y;
+                if(instant)
+                {
+                    content.position += Vector3.up * distanceToMove;
+                    return;
+                }
             }
             else
             {
@@ -211,28 +228,31 @@ namespace Sparkfire.Sample
                 if(isAboveList)
                 {
                     distanceToMove = viewport.transform.position.y - content.GetChild(0).transform.position.y;
-                    distanceToMove += subListIndex * listEntryHeight;
+                    distanceToMove += subListIndex * (listEntryHeight + layoutGroup.spacing);
                 }
                 else
                 {
                     distanceToMove = viewport.transform.position.y - content.GetChild(content.childCount - 1).transform.position.y;
-                    distanceToMove += (subListIndex - content.childCount) * listEntryHeight;
+                    distanceToMove += (subListIndex - content.childCount) * (listEntryHeight + layoutGroup.spacing);
                 }
+                // TODO = instant move logic
             }
 
-            scrollRect.velocity = Vector2.zero;
             StartCoroutine(MoveListOverTime(distanceToMove, snapSpeed, () =>
             {
+                // TODO - sometimes the list will (very rarely and inconsistently) not snap all the way (for some reason)
                 scrollRect.velocity = Vector2.zero;
                 scrollRectDirty = false;
             }));
         }
 
+        // can't just move the whole list because of the infinite scrolling/looping, so we have to do this (yay /s)
         private IEnumerator MoveListOverTime(float distance, float speed, Action onComplete = null)
         {
             isSnapping = true;
             speed *= Mathf.Sign(distance);
             float duration = Mathf.Abs(distance / speed);
+            float distanceMoved = 0f;
 
             for(float i = 0f; i < duration; i += Time.deltaTime)
             {
@@ -241,9 +261,13 @@ namespace Sparkfire.Sample
                     isSnapping = false;
                     yield break;
                 }
-                content.anchoredPosition += speed * Time.deltaTime * Vector2.up;
+                float distanceToMove = speed * Time.deltaTime;
+                distanceMoved += distanceToMove;
+                content.anchoredPosition += distanceToMove * Vector2.up;
                 yield return null;
             }
+            content.anchoredPosition += (distance - distanceMoved) * Vector2.up; // snap to account for rounding
+            yield return null;
             isSnapping = false;
             onComplete?.Invoke();
         }
@@ -391,6 +415,8 @@ namespace Sparkfire.Sample
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            if(Application.isPlaying)
+                SnapToSong(GetCurrentSelectedSong(), instant: true);
             UpdateListEntryXOffsets();
             onValueChanged?.Invoke();
         }
@@ -398,13 +424,14 @@ namespace Sparkfire.Sample
         /// <summary>
         /// Loops given index relative by the given amount to the current song list count (if bigger, loops to 0; if lower, loops to top)
         /// </summary>
-        private void LoopSongListIndex(ref int index, int increment)
+        private int LoopSongListIndex(ref int index, int increment = 0)
         {
             index += increment;
             if(index < 0)
                 index += currentSongList.Count;
             else if(index >= currentSongList.Count)
                 index -= currentSongList.Count;
+            return index;
         }
 
         #endregion
