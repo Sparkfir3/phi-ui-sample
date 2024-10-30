@@ -27,9 +27,9 @@ namespace Sparkfire.Sample
         [SerializeField]
         private float xOffset;
         [SerializeField]
-        private float maxHeightUp = 600;
+        private int maxElementsUp = 5;
         [SerializeField]
-        private float maxHeightDown = 600;
+        private int maxElementsDown = 7;
         [SerializeField]
         private bool infiniteLoopedScrolling;
         [SerializeField]
@@ -44,13 +44,15 @@ namespace Sparkfire.Sample
         [SerializeField]
         private ScrollRect scrollRect;
         [SerializeField]
-        private VerticalLayoutGroup layoutGroup; // TODO - use layout group to account for padding and spacing
+        private VerticalLayoutGroup layoutGroup;
 
         // ---
 
         private RectTransform content => scrollRect.content;
         private RectTransform viewport => scrollRect.viewport;
-        private int MaxVisibleListEntries => Mathf.FloorToInt((maxHeightUp + maxHeightDown) / listEntryHeight);
+        private float MaxHeightUp => (listEntryHeight + layoutGroup.spacing) * (maxElementsUp + 1); // +1 is used as a buffer
+        private float MaxHeightDown => (listEntryHeight + layoutGroup.spacing) * (maxElementsDown + 1);
+        private int MaxVisibleListEntries => maxElementsUp + maxElementsDown + 1; // +1 for the center element
 
         private float stoppedVelocityTimer;
         private bool isSnapping;
@@ -187,14 +189,6 @@ namespace Sparkfire.Sample
 
         #region List Movement
 
-        private void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.Space))
-            {
-                SnapToSong(currentSongList[1]);
-            }
-        }
-
         public void SnapToSong(MusicData targetSong)
         {
             if(!currentSongList.Contains(targetSong))
@@ -256,14 +250,17 @@ namespace Sparkfire.Sample
 
         private void UpdateListEntryXOffsets()
         {
-            foreach(Transform item in content)
+            float contentHeight = content.rect.height;
+            foreach(Transform child in content)
             {
-                if(item.childCount == 0 || !item.GetChild(0).TryGetComponent(out RectTransform child))
+                if(child.childCount == 0 || !child.GetChild(0).TryGetComponent(out RectTransform childRectTransform))
                     return;
 
-                float yOffset = item.transform.position.y - viewport.transform.parent.TransformPoint(Vector3.zero).y;
+                float itemYPosition = child.GetComponent<RectTransform>().anchoredPosition.y // this should always be negative, anchored to the content LG's top left
+                    + content.anchoredPosition.y;
+                float yOffset = contentHeight / 2f + itemYPosition;
                 float yOffsetCount = yOffset / listEntryHeight;
-                child.anchoredPosition = new Vector2(yOffsetCount * xOffset, 0f);
+                childRectTransform.anchoredPosition = new Vector2(yOffsetCount * xOffset, 0f);
             }
         }
 
@@ -289,8 +286,8 @@ namespace Sparkfire.Sample
             // Check lower bound
             if(infiniteLoopedScrolling || topIndex > 0)
             {
-                Transform lastChild = content.GetChild(content.childCount - 1);
-                if(lastChild.transform.position.y - viewport.transform.position.y < -maxHeightDown)
+                RectTransform lastChild = content.GetChild(content.childCount - 1).GetComponent<RectTransform>();
+                if(content.anchoredPosition.y + lastChild.anchoredPosition.y + (content.rect.height / 2f) < -MaxHeightDown)
                 {
                     LoopListBottom();
                     layoutGroupDirty = true;
@@ -299,7 +296,8 @@ namespace Sparkfire.Sample
             // Check upper bound
             if(infiniteLoopedScrolling || bottomIndex < currentSongList.Count - 1)
             {
-                if(content.GetChild(0).transform.position.y - viewport.transform.position.y > maxHeightUp)
+                RectTransform firstChild = content.GetChild(0).GetComponent<RectTransform>();
+                if(content.anchoredPosition.y + firstChild.anchoredPosition.y + (content.rect.height / 2f) > MaxHeightUp)
                 {
                     LoopListTop();
                     layoutGroupDirty = true;
