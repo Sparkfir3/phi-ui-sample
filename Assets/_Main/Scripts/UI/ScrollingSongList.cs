@@ -416,7 +416,7 @@ namespace Sparkfire.Sample
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
             if(Application.isPlaying)
-                SnapToSong(GetCurrentSelectedSong(), instant: true);
+                SnapToSong(0, instant: true);
             UpdateListEntryXOffsets();
             onValueChanged?.Invoke();
         }

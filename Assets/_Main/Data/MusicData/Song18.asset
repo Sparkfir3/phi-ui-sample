@@ -16,7 +16,7 @@ MonoBehaviour:
   <Artist>k__BackingField: Artist
   <CoverArt>k__BackingField: {fileID: 0}
   <DifficultyEZ>k__BackingField:
-    <Level>k__BackingField: 2
+    <Level>k__BackingField: 4
     <Score>k__BackingField: 10000000
     <Accuracy>k__BackingField: 100
     <Grade>k__BackingField: S

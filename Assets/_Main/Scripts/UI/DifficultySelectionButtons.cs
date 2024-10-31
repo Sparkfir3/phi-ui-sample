@@ -47,16 +47,24 @@ namespace Sparkfire.Sample
             MoveDifficultySlider(startingDifficulty, true);
         }
 
-        public void SetDifficultyInfo(MusicData data, MusicData.Difficulty difficulty)
+        public void SetDifficultyInfo(MusicData data, MusicData.Difficulty difficulty, bool instant = false)
         {
             foreach(MusicData.Difficulty diff in new MusicData.Difficulty[] { MusicData.Difficulty.EZ, MusicData.Difficulty.HD, MusicData.Difficulty.IN })
             {
                 GetDifficultyInfoBox(diff).SetDifficultyLevel(data.GetDifficultyInfo(diff).Level);
             }
             currentDifficultyInfoBox.SetDifficultyName(difficulty);
-            currentDifficultyInfoBox.SetDifficultyLevel(data.GetDifficultyInfo(difficulty).Level);
 
             MoveDifficultySlider(difficulty);
+            if(instant)
+            {
+                currentDifficultyInfoBox.SetDifficultyLevel(data.GetDifficultyInfo(difficulty).Level);
+            }
+            else
+            {
+                StopAllCoroutines(); // the only coroutine active should be the LerpDifficultyLevelText one
+                StartCoroutine(LerpDifficultyLevelText(data.GetDifficultyInfo(difficulty).Level));
+            }
         }
 
         // ------------------------------
@@ -100,6 +108,29 @@ namespace Sparkfire.Sample
             currentDifficultySlider.transform.DOKill();
             currentDifficultySlider.transform.DOMove(GetDifficultyInfoBox(difficulty).transform.position, changeDifficultySlideDuration).SetEase(changeDifficultySlideCurve);
             currentDifficultyImage.DOColor(GetDifficultyColor(difficulty), changeDifficultySlideDuration).SetEase(changeDifficultySlideCurve);
+        }
+
+        private IEnumerator LerpDifficultyLevelText(int level)
+        {
+            int prevLevel = currentDifficultyInfoBox.CurrentDifficultyLevel;
+            if(prevLevel < 0 || prevLevel == level)
+            {
+                currentDifficultyInfoBox.SetDifficultyLevel(level);
+                yield break;
+            }
+
+            bool increment = level - prevLevel > 0;
+            float timePerChange = changeDifficultySlideDuration / Mathf.Abs(prevLevel - level);
+            for(float i = 0f, j = 0f; i <= changeDifficultySlideDuration; i += Time.deltaTime, j += Time.deltaTime)
+            {
+                if(j >= timePerChange)
+                {
+                    currentDifficultyInfoBox.SetDifficultyLevel(increment ? ++prevLevel : --prevLevel);
+                    j -= timePerChange;
+                }
+                yield return null;
+            }
+            currentDifficultyInfoBox.SetDifficultyLevel(level);
         }
     }
 }
