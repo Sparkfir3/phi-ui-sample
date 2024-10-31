@@ -340,8 +340,8 @@ namespace Sparkfire.Sample
         {
             // Move transform/scroll rect
             content.GetChild(content.childCount - 1).SetAsFirstSibling();
-            content.anchoredPosition += Vector2.up * listEntryHeight;
-            UpdateScrollRectMouseStartPosition(-listEntryHeight);
+            content.anchoredPosition += Vector2.up * (listEntryHeight + layoutGroup.spacing);
+            UpdateScrollRectMouseStartPosition(-(listEntryHeight + layoutGroup.spacing));
 
             // Update display list
             songDisplays.Insert(0, songDisplays[^1]);
@@ -358,8 +358,8 @@ namespace Sparkfire.Sample
         {
             // Move transform/scroll rect
             content.GetChild(0).SetAsLastSibling();
-            content.anchoredPosition -= Vector2.up * listEntryHeight;
-            UpdateScrollRectMouseStartPosition(listEntryHeight);
+            content.anchoredPosition -= Vector2.up * (listEntryHeight + layoutGroup.spacing);
+            UpdateScrollRectMouseStartPosition(listEntryHeight + layoutGroup.spacing);
 
             // Update display list
             songDisplays.Add(songDisplays[0]);
