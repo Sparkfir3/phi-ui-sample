@@ -191,14 +191,6 @@ namespace Sparkfire.Sample
 
         #region List Movement
 
-        private void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.Space))
-            {
-                SnapToSong(GetCurrentSelectedSong());
-            }
-        }
-
         public void SnapToSong(MusicData targetSong, bool instant = false)
         {
             if(!currentSongList.Contains(targetSong))

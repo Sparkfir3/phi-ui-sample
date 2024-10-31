@@ -116,7 +116,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 207750803980908672, guid: 8df441cd7a70dda419f88ab2732b8ab9, type: 3}
       propertyPath: m_Name
-      value: SongList
+      value: SongListContainer
       objectReference: {fileID: 0}
     - target: {fileID: 244550171089160964, guid: 8df441cd7a70dda419f88ab2732b8ab9, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1638,7 +1638,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4516483957169950844, guid: 3c6abeacdd8c37b4884d4f26322cef83, type: 3}
       propertyPath: m_Name
-      value: SongInfo
+      value: CurrentSongInfoContainer
       objectReference: {fileID: 0}
     - target: {fileID: 4687575765301140252, guid: 3c6abeacdd8c37b4884d4f26322cef83, type: 3}
       propertyPath: m_AnchorMax.y
