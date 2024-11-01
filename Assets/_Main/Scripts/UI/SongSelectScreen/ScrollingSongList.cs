@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -227,7 +226,7 @@ namespace Sparkfire.Sample
                     distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(content.childCount - 1).GetComponent<RectTransform>().anchoredPosition.y;
                     distanceToMove += (subListIndex - content.childCount) * (listEntryHeight + layoutGroup.spacing);
                 }
-                // TODO = instant move logic
+                // TODO - instant move logic
             }
 
             StartCoroutine(MoveListOverTime(distanceToMove, snapSpeed, () =>

@@ -57,6 +57,8 @@ namespace Sparkfire.Sample
             scoreDisplay.SetInfo(difficultyInfo.Score, difficultyInfo.Accuracy, difficultyInfo.Grade);
             coverImage.sprite = currentSongData.CoverArt;
             difficultySelectButtons.SetDifficultyInfo(currentSongData, currentDifficulty, true);
+
+            // Clicking sfx for when a song changes should play here
         }
 
         private void UpdateDifficulty(MusicData.Difficulty newDifficulty)
