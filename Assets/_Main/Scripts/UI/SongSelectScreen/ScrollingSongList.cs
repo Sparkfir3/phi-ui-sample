@@ -207,10 +207,10 @@ namespace Sparkfire.Sample
             float distanceToMove;
             if(isTargetSongVisible)
             {
-                distanceToMove = viewport.transform.position.y - content.GetChild(subListIndex).transform.position.y;
+                distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(subListIndex).GetComponent<RectTransform>().anchoredPosition.y;
                 if(instant)
                 {
-                    content.position += Vector3.up * distanceToMove;
+                    content.position += Vector3.down * distanceToMove;
                     return;
                 }
             }
@@ -219,12 +219,12 @@ namespace Sparkfire.Sample
                 bool isAboveList = subListIndex < 0;
                 if(isAboveList)
                 {
-                    distanceToMove = viewport.transform.position.y - content.GetChild(0).transform.position.y;
+                    distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(0).GetComponent<RectTransform>().anchoredPosition.y;
                     distanceToMove += subListIndex * (listEntryHeight + layoutGroup.spacing);
                 }
                 else
                 {
-                    distanceToMove = viewport.transform.position.y - content.GetChild(content.childCount - 1).transform.position.y;
+                    distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(content.childCount - 1).GetComponent<RectTransform>().anchoredPosition.y;
                     distanceToMove += (subListIndex - content.childCount) * (listEntryHeight + layoutGroup.spacing);
                 }
                 // TODO = instant move logic
@@ -232,7 +232,7 @@ namespace Sparkfire.Sample
 
             StartCoroutine(MoveListOverTime(distanceToMove, snapSpeed, () =>
             {
-                // TODO - sometimes the list will (very rarely and inconsistently) not snap all the way (for some reason)
+                // TODO - sometimes the list will (very rarely) not snap all the way (for some reason)
                 scrollRect.velocity = Vector2.zero;
                 scrollRectDirty = false;
             }));
@@ -255,10 +255,10 @@ namespace Sparkfire.Sample
                 }
                 float distanceToMove = speed * Time.deltaTime;
                 distanceMoved += distanceToMove;
-                content.anchoredPosition += distanceToMove * Vector2.up;
+                content.anchoredPosition += distanceToMove * Vector2.down;
                 yield return null;
             }
-            content.anchoredPosition += (distance - distanceMoved) * Vector2.up; // snap to account for rounding
+            content.anchoredPosition += (distance - distanceMoved) * Vector2.down; // snap to account for rounding
             yield return null;
             isSnapping = false;
             onComplete?.Invoke();
