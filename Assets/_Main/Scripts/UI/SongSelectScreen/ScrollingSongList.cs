@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,34 +22,36 @@ namespace Sparkfire.Sample
         private int bottomIndex;
 
         [Header("Settings"), SerializeField]
-        private float listEntryHeight = 100; // TODO - scale with screen size
+        private float listEntryHeight = 100;
         [SerializeField]
         private float xOffset;
         [SerializeField]
-        private float maxHeightUp = 600;
+        private int maxElementsUp = 5;
         [SerializeField]
-        private float maxHeightDown = 600;
-        [SerializeField]
-        private bool infiniteLoopedScrolling;
+        private int maxElementsDown = 7;
         [SerializeField]
         private float snapSpeed = 1000f;
         [SerializeField]
         private float stoppedVelocityThreshold = 10f;
         [SerializeField]
         private float stoppedVelocityTimerDuration = 1f;
+        // [SerializeField] // This breaks things that we added later so we'll just disable it for now, don't really need it anyways it's just nice to have
+        private bool infiniteLoopedScrolling;
 
         [Header("Object References"), SerializeField]
         private GameObject listEntryPrefab;
         [SerializeField]
         private ScrollRect scrollRect;
         [SerializeField]
-        private VerticalLayoutGroup layoutGroup; // TODO - use layout group to account for padding and spacing
+        private VerticalLayoutGroup layoutGroup;
 
         // ---
 
         private RectTransform content => scrollRect.content;
         private RectTransform viewport => scrollRect.viewport;
-        private int MaxVisibleListEntries => Mathf.FloorToInt((maxHeightUp + maxHeightDown) / listEntryHeight);
+        private float MaxHeightUp => (listEntryHeight + layoutGroup.spacing) * (maxElementsUp + 1); // +1 is used as a buffer
+        private float MaxHeightDown => (listEntryHeight + layoutGroup.spacing) * (maxElementsDown + 1);
+        private int MaxVisibleListEntries => maxElementsUp + maxElementsDown + 1; // +1 for the center element
 
         private float stoppedVelocityTimer;
         private bool isSnapping;
@@ -168,17 +169,19 @@ namespace Sparkfire.Sample
 
         public MusicData GetCurrentSelectedSong()
         {
-            float centerDistanceFromTop = (content.rect.height / 2f) + (listEntryHeight / 2f) + content.anchoredPosition.y; // distance from top of content to "center" of the list
-            int indexAboveCenter = Mathf.FloorToInt((centerDistanceFromTop) / listEntryHeight) - 1;
-            if(indexAboveCenter >= songDisplays.Count - 1)
+            float centerDistanceFromTop = (content.rect.height / 2f) + (listEntryHeight / 2f) + content.anchoredPosition.y; // distance from top of content to "center" of the list (viewport 0)
+            int listIndexAboveCenter = Mathf.FloorToInt(centerDistanceFromTop / (listEntryHeight + layoutGroup.spacing)) - 1;
+            if(listIndexAboveCenter >= songDisplays.Count - 1)
                 return currentSongList[bottomIndex];
-            if(indexAboveCenter < 0)
+            if(listIndexAboveCenter < 0)
                 return currentSongList[topIndex];
 
-            float itemAboveDistance = Mathf.Abs(content.GetChild(indexAboveCenter).transform.position.y - viewport.transform.position.y);
-            float itemBelowDistance = Mathf.Abs(content.GetChild(indexAboveCenter + 1).transform.position.y - viewport.transform.position.y);
+            float itemAboveDistance = Mathf.Abs(content.GetChild(listIndexAboveCenter).transform.position.y - viewport.transform.position.y);
+            float itemBelowDistance = Mathf.Abs(content.GetChild(listIndexAboveCenter + 1).transform.position.y - viewport.transform.position.y);
 
-            return itemAboveDistance <= itemBelowDistance ? currentSongList[indexAboveCenter + topIndex] : currentSongList[indexAboveCenter + topIndex + 1];
+            int songIndexAboveCenter = listIndexAboveCenter + topIndex;
+            LoopSongListIndex(ref songIndexAboveCenter);
+            return itemAboveDistance <= itemBelowDistance ? currentSongList[songIndexAboveCenter] : currentSongList[LoopSongListIndex(ref songIndexAboveCenter, 1)];
         }
 
         #endregion
@@ -187,58 +190,60 @@ namespace Sparkfire.Sample
 
         #region List Movement
 
-        private void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.Space))
-            {
-                SnapToSong(currentSongList[1]);
-            }
-        }
-
-        public void SnapToSong(MusicData targetSong)
+        public void SnapToSong(MusicData targetSong, bool instant = false)
         {
             if(!currentSongList.Contains(targetSong))
                 return;
-            SnapToSong(currentSongList.IndexOf(targetSong));
+            SnapToSong(currentSongList.IndexOf(targetSong), instant);
         }
 
-        public void SnapToSong(int index)
+        public void SnapToSong(int index, bool instant = false)
         {
+            scrollRect.velocity = Vector2.zero;
+
             int subListIndex = index - topIndex;
             bool isTargetSongVisible = subListIndex < content.childCount && subListIndex >= 0;
             float distanceToMove;
             if(isTargetSongVisible)
             {
-                distanceToMove = viewport.transform.position.y - content.GetChild(subListIndex).transform.position.y;
+                distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(subListIndex).GetComponent<RectTransform>().anchoredPosition.y;
+                if(instant)
+                {
+                    content.position += Vector3.down * distanceToMove;
+                    return;
+                }
             }
             else
             {
                 bool isAboveList = subListIndex < 0;
                 if(isAboveList)
                 {
-                    distanceToMove = viewport.transform.position.y - content.GetChild(0).transform.position.y;
-                    distanceToMove += subListIndex * listEntryHeight;
+                    distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(0).GetComponent<RectTransform>().anchoredPosition.y;
+                    distanceToMove += subListIndex * (listEntryHeight + layoutGroup.spacing);
                 }
                 else
                 {
-                    distanceToMove = viewport.transform.position.y - content.GetChild(content.childCount - 1).transform.position.y;
-                    distanceToMove += (subListIndex - content.childCount) * listEntryHeight;
+                    distanceToMove = content.rect.height / 2 + content.anchoredPosition.y + content.GetChild(content.childCount - 1).GetComponent<RectTransform>().anchoredPosition.y;
+                    distanceToMove += (subListIndex - content.childCount) * (listEntryHeight + layoutGroup.spacing);
                 }
+                // TODO - instant move logic
             }
 
-            scrollRect.velocity = Vector2.zero;
             StartCoroutine(MoveListOverTime(distanceToMove, snapSpeed, () =>
             {
+                // TODO - sometimes the list will (very rarely) not snap all the way (for some reason)
                 scrollRect.velocity = Vector2.zero;
                 scrollRectDirty = false;
             }));
         }
 
+        // can't just move the whole list because of the infinite scrolling/looping, so we have to do this (yay /s)
         private IEnumerator MoveListOverTime(float distance, float speed, Action onComplete = null)
         {
             isSnapping = true;
             speed *= Mathf.Sign(distance);
             float duration = Mathf.Abs(distance / speed);
+            float distanceMoved = 0f;
 
             for(float i = 0f; i < duration; i += Time.deltaTime)
             {
@@ -247,23 +252,30 @@ namespace Sparkfire.Sample
                     isSnapping = false;
                     yield break;
                 }
-                content.anchoredPosition += speed * Time.deltaTime * Vector2.up;
+                float distanceToMove = speed * Time.deltaTime;
+                distanceMoved += distanceToMove;
+                content.anchoredPosition += distanceToMove * Vector2.down;
                 yield return null;
             }
+            content.anchoredPosition += (distance - distanceMoved) * Vector2.down; // snap to account for rounding
+            yield return null;
             isSnapping = false;
             onComplete?.Invoke();
         }
 
         private void UpdateListEntryXOffsets()
         {
-            foreach(Transform item in content)
+            float contentHeight = content.rect.height;
+            foreach(Transform child in content)
             {
-                if(item.childCount == 0 || !item.GetChild(0).TryGetComponent(out RectTransform child))
+                if(child.childCount == 0 || !child.GetChild(0).TryGetComponent(out RectTransform childRectTransform))
                     return;
 
-                float yOffset = item.transform.position.y - viewport.transform.parent.TransformPoint(Vector3.zero).y;
+                float itemYPosition = child.GetComponent<RectTransform>().anchoredPosition.y // this should always be negative, anchored to the content LG's top left
+                    + content.anchoredPosition.y;
+                float yOffset = contentHeight / 2f + itemYPosition;
                 float yOffsetCount = yOffset / listEntryHeight;
-                child.anchoredPosition = new Vector2(yOffsetCount * xOffset, 0f);
+                childRectTransform.anchoredPosition = new Vector2(yOffsetCount * xOffset, 0f);
             }
         }
 
@@ -289,8 +301,8 @@ namespace Sparkfire.Sample
             // Check lower bound
             if(infiniteLoopedScrolling || topIndex > 0)
             {
-                Transform lastChild = content.GetChild(content.childCount - 1);
-                if(lastChild.transform.position.y - viewport.transform.position.y < -maxHeightDown)
+                RectTransform lastChild = content.GetChild(content.childCount - 1).GetComponent<RectTransform>();
+                if(content.anchoredPosition.y + lastChild.anchoredPosition.y + (content.rect.height / 2f) < -MaxHeightDown)
                 {
                     LoopListBottom();
                     layoutGroupDirty = true;
@@ -299,7 +311,8 @@ namespace Sparkfire.Sample
             // Check upper bound
             if(infiniteLoopedScrolling || bottomIndex < currentSongList.Count - 1)
             {
-                if(content.GetChild(0).transform.position.y - viewport.transform.position.y > maxHeightUp)
+                RectTransform firstChild = content.GetChild(0).GetComponent<RectTransform>();
+                if(content.anchoredPosition.y + firstChild.anchoredPosition.y + (content.rect.height / 2f) > MaxHeightUp)
                 {
                     LoopListTop();
                     layoutGroupDirty = true;
@@ -318,8 +331,8 @@ namespace Sparkfire.Sample
         {
             // Move transform/scroll rect
             content.GetChild(content.childCount - 1).SetAsFirstSibling();
-            content.anchoredPosition += Vector2.up * listEntryHeight;
-            UpdateScrollRectMouseStartPosition(-listEntryHeight);
+            content.anchoredPosition += Vector2.up * (listEntryHeight + layoutGroup.spacing);
+            UpdateScrollRectMouseStartPosition(-(listEntryHeight + layoutGroup.spacing));
 
             // Update display list
             songDisplays.Insert(0, songDisplays[^1]);
@@ -336,8 +349,8 @@ namespace Sparkfire.Sample
         {
             // Move transform/scroll rect
             content.GetChild(0).SetAsLastSibling();
-            content.anchoredPosition -= Vector2.up * listEntryHeight;
-            UpdateScrollRectMouseStartPosition(listEntryHeight);
+            content.anchoredPosition -= Vector2.up * (listEntryHeight + layoutGroup.spacing);
+            UpdateScrollRectMouseStartPosition(listEntryHeight + layoutGroup.spacing);
 
             // Update display list
             songDisplays.Add(songDisplays[0]);
@@ -393,6 +406,8 @@ namespace Sparkfire.Sample
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            if(Application.isPlaying)
+                SnapToSong(0, instant: true);
             UpdateListEntryXOffsets();
             onValueChanged?.Invoke();
         }
@@ -400,13 +415,14 @@ namespace Sparkfire.Sample
         /// <summary>
         /// Loops given index relative by the given amount to the current song list count (if bigger, loops to 0; if lower, loops to top)
         /// </summary>
-        private void LoopSongListIndex(ref int index, int increment)
+        private int LoopSongListIndex(ref int index, int increment = 0)
         {
             index += increment;
             if(index < 0)
                 index += currentSongList.Count;
             else if(index >= currentSongList.Count)
                 index -= currentSongList.Count;
+            return index;
         }
 
         #endregion

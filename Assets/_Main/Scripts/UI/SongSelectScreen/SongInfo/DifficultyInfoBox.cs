@@ -35,5 +35,7 @@ namespace Sparkfire.Sample
         {
             difficultyNameTextBox.text = difficulty.ToString();
         }
+
+        public int CurrentDifficultyLevel => int.TryParse(difficultyLevelTextBox.text, out int level) ? level : -1;
     }
 }

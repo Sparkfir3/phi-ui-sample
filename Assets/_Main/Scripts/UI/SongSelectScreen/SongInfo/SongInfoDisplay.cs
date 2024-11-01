@@ -26,7 +26,10 @@ namespace Sparkfire.Sample
         {
             songNameTextBox.text = songName;
             if(songArtistTextBox)
+            {
+                songArtistTextBox.gameObject.SetActive(!string.IsNullOrWhiteSpace(artist));
                 songArtistTextBox.text = artist;
+            }
 
             SetDifficultyLevel(level, difficultyName);
         }

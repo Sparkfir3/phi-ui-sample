@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Song8
   m_EditorClassIdentifier: 
   <SongName>k__BackingField: Song 8
-  <Artist>k__BackingField: 
+  <Artist>k__BackingField: Artist
   <CoverArt>k__BackingField: {fileID: 0}
   <DifficultyEZ>k__BackingField:
     <Level>k__BackingField: 2
@@ -26,7 +26,7 @@ MonoBehaviour:
     <Accuracy>k__BackingField: 90
     <Grade>k__BackingField: B
   <DifficultyIN>k__BackingField:
-    <Level>k__BackingField: 13
-    <Score>k__BackingField: 10000000
-    <Accuracy>k__BackingField: 100
+    <Level>k__BackingField: 16
+    <Score>k__BackingField: 9639105
+    <Accuracy>k__BackingField: 95.1
     <Grade>k__BackingField: S

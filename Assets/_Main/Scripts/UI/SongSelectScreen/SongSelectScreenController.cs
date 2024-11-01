@@ -11,6 +11,8 @@ namespace Sparkfire.Sample
         private MusicData currentSongData;
         [SerializeField]
         private MusicData.Difficulty currentDifficulty = MusicData.Difficulty.IN;
+        [SerializeField]
+        private bool mirrorModeActive;
 
         [Header("Settings & Data"), SerializeField]
         private List<MusicData> musicData;
@@ -25,6 +27,8 @@ namespace Sparkfire.Sample
         private ScoreDisplay scoreDisplay;
         [SerializeField]
         private DifficultySelectionButtons difficultySelectButtons;
+        [SerializeField]
+        private GameObject mirrorModeIndicator;
 
         // ------------------------------
 
@@ -35,6 +39,8 @@ namespace Sparkfire.Sample
 
             difficultySelectButtons.Initialize(currentDifficulty);
             difficultySelectButtons.onChangeDifficultyClicked += UpdateDifficulty;
+
+            SetMirrorMode(mirrorModeActive); // set GameObjects to be active/inactive correctly
         }
 
         // ------------------------------
@@ -50,7 +56,9 @@ namespace Sparkfire.Sample
             currentSongDisplay.SetInfo(currentSongData, currentDifficulty);
             scoreDisplay.SetInfo(difficultyInfo.Score, difficultyInfo.Accuracy, difficultyInfo.Grade);
             coverImage.sprite = currentSongData.CoverArt;
-            difficultySelectButtons.SetDifficultyInfo(currentSongData, currentDifficulty);
+            difficultySelectButtons.SetDifficultyInfo(currentSongData, currentDifficulty, true);
+
+            // Clicking sfx for when a song changes should play here
         }
 
         private void UpdateDifficulty(MusicData.Difficulty newDifficulty)
@@ -63,5 +71,32 @@ namespace Sparkfire.Sample
             difficultySelectButtons.SetDifficultyInfo(currentSongData, newDifficulty);
             scoreDisplay.SetInfo(difficultyInfo.Score, difficultyInfo.Accuracy, difficultyInfo.Grade);
         }
+
+        // ------------------------------
+
+        #region Button Events
+
+        public void QuitGame()
+        {
+            Debug.Log("Running Application.Quit()");
+            Application.Quit();
+        }
+
+        public void StartGame()
+        {
+            songList.SnapToSong(currentSongData);
+            Debug.Log($"Trying to play song {currentSongData.SongName} on " +
+                $"difficulty {currentDifficulty.ToString()} (level {currentSongData.GetDifficultyInfo(currentDifficulty).Level})" +
+                $"{(mirrorModeActive ? " [MIRROR MODE]" : "")}");
+            // If we were actually starting a game here, you'd probably want to disable UI interactions here
+        }
+
+        public void SetMirrorMode(bool active)
+        {
+            mirrorModeActive = active;
+            mirrorModeIndicator.SetActive(active);
+        }
+
+        #endregion
     }
 }
